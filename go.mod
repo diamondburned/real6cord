@@ -5,6 +5,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/diamondburned/discordgo v1.1.2
 	github.com/disintegration/imaging v1.6.0
+	github.com/eidolon/wordwrap v0.0.0-20161011182207-e0f54129b8bb
 	github.com/gdamore/tcell v1.1.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.5.3 // indirect

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/diamondburned/discordgo"
+	"github.com/eidolon/wordwrap"
 	"gitlab.com/diamondburned/real6cord/tui"
 	"gitlab.com/diamondburned/real6cord/vt"
 )
@@ -42,10 +43,10 @@ func messageRenderer() {
 var authorCounter int
 
 func drawMessage(m *discordgo.Message, d *drawAuthor) {
+	s, _ := tui.GetScreen()
+
 	switch {
 	case d != nil:
-		s, _ := tui.GetScreen()
-
 		a, err := getAvatar(m.Author, false)
 		if err != nil {
 			panic(err)
@@ -78,7 +79,10 @@ func drawMessage(m *discordgo.Message, d *drawAuthor) {
 
 	vt.MoveCursorDown(1)
 	vt.MoveCursorToLineStart()
-	vt.MoveCursorRight(contentPadding)
 
-	print(m.Content)
+	wrapper := wordwrap.Wrapper(int(s.Col)-contentPadding-1, true)
+	for _, l := range strings.Split(wrapper(m.Content), "\n") {
+		vt.MoveCursorRight(contentPadding)
+		print(l)
+	}
 }
