@@ -25,3 +25,7 @@ func MoveCursorLine(line int) {
 func MoveCursorToLineStart() {
 	MoveCursorLeft(9999)
 }
+
+func MoveCursorTo(row, col int) {
+	fmt.Printf("\033[%d;%d", row, col)
+}
