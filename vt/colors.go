@@ -269,12 +269,12 @@ var (
 		255: colorful.Color{R: 238 / 255.0, G: 238 / 255.0, B: 238 / 255.0},
 	}
 
-	colStore = map[int64]uint{}
+	colStore = map[int64]uint8{}
 	colMutex sync.Mutex
 )
 
 // GetRGBInt takes in an RGB int64 and return a terminal color ID
-func GetRGBInt(rgb int64) uint {
+func GetRGBInt(rgb int64) uint8 {
 	if u, ok := colStore[rgb]; ok {
 		return u
 	}
@@ -299,14 +299,14 @@ func GetRGBInt(rgb int64) uint {
 }
 
 // GetColorInt takes in (r|g|b)/255
-func GetColorInt(r, g, b float64) (j uint) {
+func GetColorInt(r, g, b float64) (j uint8) {
 	var (
 		c = colorful.Color{R: r, G: g, B: b}
 		m float64
 	)
 
-	for i := uint(0); i < 256; i++ {
-		rgb := c.DistanceRgb(Colors[uint8(i)])
+	for i := uint8(0); i <= 255; i++ {
+		rgb := c.DistanceRgb(Colors[i])
 		if i == 0 || rgb < m {
 			m = rgb
 			j = i
@@ -317,10 +317,10 @@ func GetColorInt(r, g, b float64) (j uint) {
 }
 
 // FmtColorForeground turns a terminal color ID into string
-func FmtColorForeground(c uint) string {
+func FmtColorForeground(c uint8) string {
 	return fmt.Sprintf("\033[38;5;%dm", c)
 }
 
-func ColorString(c uint, s string) string {
+func ColorString(c uint8, s string) string {
 	return fmt.Sprintf("\033[38;5;%dm%s\033[0m", c, s)
 }
