@@ -299,21 +299,22 @@ func GetRGBInt(rgb int64) uint8 {
 }
 
 // GetColorInt takes in (r|g|b)/255
-func GetColorInt(r, g, b float64) (j uint8) {
+func GetColorInt(r, g, b float64) uint8 {
 	var (
 		c = colorful.Color{R: r, G: g, B: b}
 		m float64
+		j uint
 	)
 
-	for i := uint8(0); i <= 255; i++ {
-		rgb := c.DistanceRgb(Colors[i])
+	for i := uint(0); i < 256; i++ {
+		rgb := c.DistanceRgb(Colors[uint8(i)])
 		if i == 0 || rgb < m {
 			m = rgb
 			j = i
 		}
 	}
 
-	return
+	return uint8(j)
 }
 
 // FmtColorForeground turns a terminal color ID into string
