@@ -273,29 +273,36 @@ var (
 	colMutex sync.Mutex
 )
 
-// GetRGBInt takes in an RGB int64 and return a terminal color ID
+// GetRGBInt takes in an RGB int64 and return a
+// terminal color ID.
 func GetRGBInt(rgb int64) uint8 {
+	colMutex.Lock()
+	defer colMutex.Unlock()
+
 	if u, ok := colStore[rgb]; ok {
 		return u
 	}
 
-	var (
-		b = rgb & 255
-		g = (rgb >> 8) & 255
-		r = (rgb >> 16) & 255
-	)
+	u, _ := GetRGBIntAdv(rgb)
 
-	u := GetColorInt(
+	colStore[rgb] = u
+	return u
+}
+
+// GetRGBIntAdv takes in an RGB int64 and return a
+// terminal color ID. It uses GetColorIntAdv. The
+// result are NOT cached. For cached results, use
+// GetRGBInt.
+func GetRGBIntAdv(rgb int64) (uint8, float64) {
+	r := (rgb >> 16) & 255
+	g := (rgb >> 8) & 255
+	b := rgb & 255
+
+	return GetColorIntAdv(
 		float64(r)/255,
 		float64(g)/255,
 		float64(b)/255,
 	)
-
-	colMutex.Lock()
-	defer colMutex.Unlock()
-
-	colStore[rgb] = u
-	return u
 }
 
 // GetColorInt is a shotthand to GetColorIntAdv, to
