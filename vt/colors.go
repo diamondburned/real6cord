@@ -298,8 +298,16 @@ func GetRGBInt(rgb int64) uint8 {
 	return u
 }
 
-// GetColorInt takes in (r|g|b)/255
+// GetColorInt is a shotthand to GetColorIntAdv, to
+// prevent breaking changes
 func GetColorInt(r, g, b float64) uint8 {
+	u, _ := GetColorIntAdv(r, g, b)
+	return u
+}
+
+// GetColorIntAdv takes in (r|g|b)/255 and returns with
+// the distance (accuracy, the less the closer)
+func GetColorIntAdv(r, g, b float64) (uint8, float64) {
 	var (
 		c = colorful.Color{R: r, G: g, B: b}
 		m float64
@@ -314,7 +322,7 @@ func GetColorInt(r, g, b float64) uint8 {
 		}
 	}
 
-	return uint8(j)
+	return uint8(j), m
 }
 
 // FmtColorForeground turns a terminal color ID into string
