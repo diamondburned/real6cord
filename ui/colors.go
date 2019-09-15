@@ -1,4 +1,4 @@
-package vt
+package ui
 
 import (
 	"fmt"
