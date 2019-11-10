@@ -1,4 +1,4 @@
-package vt
+package ui
 
 import (
 	"fmt"
@@ -273,6 +273,11 @@ var (
 	colMutex sync.Mutex
 )
 
+const (
+	Bold  = "\033[1m"
+	Reset = "\033[0m"
+)
+
 // GetRGBInt takes in an RGB int64 and return a
 // terminal color ID.
 func GetRGBInt(rgb int64) uint8 {
@@ -338,5 +343,5 @@ func FmtColorForeground(c uint8) string {
 }
 
 func ColorString(c uint8, s string) string {
-	return fmt.Sprintf("\033[38;5;%dm%s\033[0m", c, s)
+	return fmt.Sprintf("\033[38;5;%dm%s"+Reset, c, s)
 }
