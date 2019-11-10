@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -215,11 +216,35 @@ func (p *MessagePrinter) GetHandler() func(*discordgo.Session, *discordgo.Messag
 			p.lastAu = m.Author.ID
 		}
 
+		// Reset cursor to line start
+		MoveCursorToLineStart(p.Stdout)
+
 		// Wrap the content and split the warpped content into lines
 		lines := p.wrap(m.Content)
 
-		// Reset cursor to line start
-		MoveCursorToLineStart(p.Stdout)
+		// If the content is just a single emoji
+		if emoji := getOnlyEmojiURL(m.Content); emoji != "" {
+			i, err := p.emojis.Download(emoji)
+			if err == nil {
+				// Add the total line height of the images into lineCount and
+				// currentLine
+				for i := 0; i < EmojiLines; i++ {
+					currentLine++
+					write(p.Stdout, "\n")
+
+					if currentLine > AvatarLines-1 {
+						ClearLine(p.Stdout)
+					}
+				}
+
+				MoveCursorUp(p.Stdout, EmojiLines)
+
+				MoveCursorRight(p.Stdout, p.avaChars+TextLeftPadding)
+				p.Stdout.Write(i.SIXEL)
+
+				lines = lines[:0]
+			}
+		}
 
 		// Total lines printed
 		var lineCount = len(lines)
@@ -444,6 +469,27 @@ func (p *MessagePrinter) wrapCustom(text string, width int) []string {
 func (p *MessagePrinter) writePad(text string) {
 	MoveCursorRight(p.Stdout, p.avaChars+TextLeftPadding)
 	write(p.Stdout, text+"\n")
+}
+
+var emojiRegex = regexp.MustCompile(`<(a?):(.+?):(\d+)>`)
+
+func getOnlyEmojiURL(from string) string {
+	emojiIDs := emojiRegex.FindAllStringSubmatch(from, -1)
+	if len(emojiIDs) != 1 {
+		return ""
+	}
+
+	if emojiIDs[0][1] != "" {
+		// is animated, return
+		return ""
+	}
+
+	if from != emojiIDs[0][0] {
+		// message has more than just the emoji
+		return ""
+	}
+
+	return `https://cdn.discordapp.com/emojis/` + emojiIDs[0][3] + ".png"
 }
 
 func truncateString(str string, width int) string {
