@@ -33,6 +33,18 @@ func MoveCursorTo(w io.Writer, row, col int) {
 	fmt.Fprintf(w, "\033[%d;%d", row, col)
 }
 
+func ClearLine(w io.Writer) {
+	io.WriteString(w, "\033[2K")
+}
+
+func HideCursor(w io.Writer) {
+	io.WriteString(w, "\033[?25l")
+}
+
+func ShowCursor(w io.Writer) {
+	io.WriteString(w, "\033[?25h")
+}
+
 func write(w io.Writer, s string) {
 	w.Write([]byte(s))
 }

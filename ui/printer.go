@@ -11,7 +11,7 @@ type PrinterMu struct {
 	w io.Writer
 }
 
-func NewPrinterMu(w io.Writer) *PrinterMu {
+func NewPrinterMu(w io.Writer) io.Writer {
 	return &PrinterMu{w}
 }
 

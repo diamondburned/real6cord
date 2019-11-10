@@ -41,10 +41,20 @@ func TestMessagePrinter(t *testing.T) {
 				Username: "xent",
 				Avatar:   "14a6121178e205defbcb3a5f54f9dc8a",
 			},
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Image: &discordgo.MessageEmbedImage{
+						URL:      "https://media.discordapp.net/attachments/361916911682060289/642874709851242526/unknown.png",
+						ProxyURL: "https://media.discordapp.net/attachments/361916911682060289/642874709851242526/unknown.png",
+						Width:    125,
+						Height:   200,
+					},
+				},
+			},
 		},
 	}
 
-	p := NewMessagePrinter(nil)
+	p := NewMessagePrinter(nil, nil)
 	handler := p.GetHandler()
 
 	for _, m := range msgs {

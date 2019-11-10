@@ -7,39 +7,45 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/diamondburned/discordgo"
 	"github.com/mattn/go-sixel"
-	"gitlab.com/diamondburned/real6cord/imageutil"
 )
 
 func SIXELNoDithering(enc sixel.Encoder) {
 	enc.Dither = false
 }
 
-type Avatar struct {
-	store   map[string][]byte
+type ImageOption func(img image.Image) image.Image
+
+type ImageStore struct {
+	store   map[string]*Image
 	storeMu sync.Mutex
 
 	EncodeOptions []func(enc *sixel.Encoder)
-	ImageOptions  []func(img image.Image) image.Image
+	ImageOptions  []ImageOption
 }
 
-func NewAvatarStore() *Avatar {
-	return &Avatar{
-		store: map[string][]byte{},
-		ImageOptions: []func(img image.Image) image.Image{
-			imageutil.Round,
-		},
+type Image struct {
+	Original image.Image
+	SIXEL    []byte
+}
+
+func NewImageStore() *ImageStore {
+	return &ImageStore{
+		store: map[string]*Image{},
 	}
 }
 
-func (i *Avatar) download(id string, r io.Reader) ([]byte, error) {
+func (i *ImageStore) AddImageOptions(f ...ImageOption) {
+	i.ImageOptions = append(i.ImageOptions, f...)
+}
+
+func (i *ImageStore) download(id string, r io.Reader, imgOpts []ImageOption) (*Image, error) {
 	img, _, err := image.Decode(r)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, o := range i.ImageOptions {
+	for _, o := range append(i.ImageOptions, imgOpts...) {
 		img = o(img)
 	}
 
@@ -59,11 +65,16 @@ func (i *Avatar) download(id string, r io.Reader) ([]byte, error) {
 	i.storeMu.Lock()
 	defer i.storeMu.Unlock()
 
-	i.store[id] = bytes
-	return bytes, nil
+	image := &Image{
+		Original: img,
+		SIXEL:    bytes,
+	}
+
+	i.store[id] = image
+	return image, nil
 }
 
-func (i *Avatar) get(id string) []byte {
+func (i *ImageStore) get(id string) *Image {
 	i.storeMu.Lock()
 	defer i.storeMu.Unlock()
 
@@ -74,17 +85,17 @@ func (i *Avatar) get(id string) []byte {
 	return nil
 }
 
-func (i *Avatar) DownloadAvatar(u *discordgo.User) ([]byte, error) {
-	if b := i.get(u.ID); b != nil {
+func (i *ImageStore) Download(url string, imageOpts ...ImageOption) (*Image, error) {
+	if b := i.get(url); b != nil {
 		return b, nil
 	}
 
-	r, err := http.Get(u.AvatarURL("64"))
+	r, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
 
 	defer r.Body.Close()
 
-	return i.download(u.ID, r.Body)
+	return i.download(url, r.Body, imageOpts)
 }

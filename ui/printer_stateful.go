@@ -1,10 +1,6 @@
 package ui
 
-import (
-	"fmt"
-	"io"
-)
-
+/*
 type StatefulPrinter struct {
 	lastCurLine int
 	lastCurCol  int
@@ -22,12 +18,12 @@ func (p *StatefulPrinter) Write(b []byte) (int, error) {
 	printMu.Lock()
 	defer printMu.Unlock()
 
-	oldLine, oldCol := getCursorPos()
-	defer MoveCursorTo(p.w, oldLine, oldCol)
+		oldLine, oldCol := getCursorPos()
+		defer MoveCursorTo(p.w, oldLine, oldCol)
 
-	if p.lastCurLine > 0 && p.lastCurCol > 0 {
-		MoveCursorTo(p.w, p.lastCurLine, p.lastCurCol)
-	}
+		if p.lastCurLine > 0 && p.lastCurCol > 0 {
+			MoveCursorTo(p.w, p.lastCurLine, p.lastCurCol)
+		}
 
 	return p.w.Write(b)
 }
@@ -59,3 +55,4 @@ func (p *StatefulPrinter) MoveCursorToLineStart() {
 func (p *StatefulPrinter) MoveCursorTo(row, col int) {
 	fmt.Fprintf(p, "\033[%d;%d", row, col)
 }
+*/

@@ -11,6 +11,8 @@ import (
 type CLIContext struct {
 	*readline.Instance
 	dg *discordgo.Session
+
+	ChannelID string
 }
 
 var grl *readline.Instance
@@ -19,7 +21,7 @@ func NewCLI(dg *discordgo.Session) (*CLIContext, error) {
 	initty()
 
 	rl, err := readline.NewEx(&readline.Config{
-		Prompt:            ">> ",
+		Prompt:            "[#nil] ",
 		InterruptPrompt:   "^C",
 		EOFPrompt:         "exit",
 		HistorySearchFold: true,
@@ -40,8 +42,13 @@ func NewCLI(dg *discordgo.Session) (*CLIContext, error) {
 	}, nil
 }
 
+func (c *CLIContext) SetChannel(channel *discordgo.Channel) {
+	c.SetPrompt("[#" + channel.Name + "] ")
+	c.ChannelID = channel.ID
+}
+
 // TODO: singleton for channelID
-func (c *CLIContext) Start(chID string) {
+func (c *CLIContext) Start() {
 	defer c.Close()
 
 ReadLoop:
@@ -58,8 +65,8 @@ ReadLoop:
 			break ReadLoop
 		}
 
-		//go c.dg.ChannelMessageSend(chID, line)
-		//break
-		print(line)
+		if c.ChannelID != "" {
+			go c.dg.ChannelMessageSend(c.ChannelID, line)
+		}
 	}
 }
